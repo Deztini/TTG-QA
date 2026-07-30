@@ -26,7 +26,7 @@ export const LECTURERS: LecturerData[] = [
   },
   {
     name: 'Dr. Akinyomade',
-    lectures: ['Plan, Programming, and Pursuit'],
+    lectures: ['Plan, Programming, and Pursuit', 'Principles of Integrity'],
   },
   {
     name: 'Prof. Oluyori',
