@@ -15,16 +15,19 @@ export class PostgresQuestionRepository implements QuestionRepository {
       id: string;
       text: string;
       author: string | null;
+      lecturer: string;
+      lecture: string;
       timestamp: Date;
     }>(
-      'SELECT id, text, author, timestamp FROM questions ORDER BY timestamp DESC'
+      'SELECT id, text, author, lecturer, lecture, timestamp FROM questions ORDER BY timestamp DESC'
     );
 
     return result.rows.map((row) => ({
       id: row.id,
       text: row.text,
       author: row.author,
-      // Normalise to ISO 8601 UTC string regardless of how pg returns the Date
+      lecturer: row.lecturer,
+      lecture: row.lecture,
       timestamp: new Date(row.timestamp).toISOString(),
     }));
   }
@@ -34,14 +37,16 @@ export class PostgresQuestionRepository implements QuestionRepository {
     const timestamp = new Date().toISOString();
 
     await this.pool.query(
-      'INSERT INTO questions (id, text, author, timestamp) VALUES ($1, $2, $3, $4)',
-      [id, dto.text, dto.author, timestamp]
+      'INSERT INTO questions (id, text, author, lecturer, lecture, timestamp) VALUES ($1, $2, $3, $4, $5, $6)',
+      [id, dto.text, dto.author, dto.lecturer, dto.lecture, timestamp]
     );
 
     return {
       id,
       text: dto.text,
       author: dto.author,
+      lecturer: dto.lecturer,
+      lecture: dto.lecture,
       timestamp,
     };
   }

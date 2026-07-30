@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRepository } from '@/lib/db';
-import { validateQuestionText } from '@/lib/validation';
+import { validateQuestionText, validateLecturer, validateLecture } from '@/lib/validation';
 
 const DB_ERROR_MESSAGE = 'Service temporarily unavailable. Please try again shortly.';
 const INTERNAL_ERROR_MESSAGE = 'Internal server error';
@@ -11,7 +11,6 @@ export async function GET(): Promise<NextResponse> {
     const questions = await repo.findAll();
     return NextResponse.json(questions, { status: 200 });
   } catch (err) {
-    // All errors from the repository are treated as DB/service errors → 503
     if (isDbError(err)) {
       return NextResponse.json({ error: DB_ERROR_MESSAGE }, { status: 503 });
     }
@@ -32,12 +31,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const { text, author } = body as Record<string, unknown>;
+  const { text, author, lecturer, lecture } = body as Record<string, unknown>;
 
   // Validate text
-  const validation = validateQuestionText(text);
-  if (!validation.isValid) {
-    return NextResponse.json({ error: validation.error }, { status: 400 });
+  const textValidation = validateQuestionText(text);
+  if (!textValidation.isValid) {
+    return NextResponse.json({ error: textValidation.error }, { status: 400 });
+  }
+
+  // Validate lecturer
+  const lecturerValidation = validateLecturer(lecturer);
+  if (!lecturerValidation.isValid) {
+    return NextResponse.json({ error: lecturerValidation.error }, { status: 400 });
+  }
+
+  // Validate lecture belongs to the selected lecturer
+  const lectureValidation = validateLecture(lecturer, lecture);
+  if (!lectureValidation.isValid) {
+    return NextResponse.json({ error: lectureValidation.error }, { status: 400 });
   }
 
   // Coerce author: empty string → null
@@ -49,6 +60,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const question = await repo.create({
       text: text as string,
       author: authorValue,
+      lecturer: lecturer as string,
+      lecture: lecture as string,
     });
     return NextResponse.json(question, { status: 201 });
   } catch (err) {

@@ -9,9 +9,20 @@ export default function QuestionCard({ question }: QuestionCardProps) {
 
   return (
     <article className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 w-full">
+      {/* Lecture badge */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+          {question.lecture}
+        </span>
+        <span className="text-xs text-gray-400">{question.lecturer}</span>
+      </div>
+
+      {/* Question text */}
       <p className="text-gray-900 text-base sm:text-lg leading-relaxed mb-3">
         {question.text}
       </p>
+
+      {/* Footer */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm text-gray-500">
         <span className="font-medium text-gray-600">
           {question.author ?? "Anonymous"}

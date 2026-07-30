@@ -16,6 +16,8 @@ export class SQLiteQuestionRepository implements QuestionRepository {
         id        TEXT PRIMARY KEY,
         text      TEXT NOT NULL,
         author    TEXT,
+        lecturer  TEXT NOT NULL,
+        lecture   TEXT NOT NULL,
         timestamp TEXT NOT NULL
       )
     `);
@@ -27,21 +29,23 @@ export class SQLiteQuestionRepository implements QuestionRepository {
     const author = dto.author ?? null;
 
     const stmt = this.db.prepare(
-      'INSERT INTO questions (id, text, author, timestamp) VALUES (?, ?, ?, ?)'
+      'INSERT INTO questions (id, text, author, lecturer, lecture, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    stmt.run(id, dto.text, author, timestamp);
+    stmt.run(id, dto.text, author, dto.lecturer, dto.lecture, timestamp);
 
-    return Promise.resolve({ id, text: dto.text, author, timestamp });
+    return Promise.resolve({ id, text: dto.text, author, lecturer: dto.lecturer, lecture: dto.lecture, timestamp });
   }
 
   async findAll(): Promise<Question[]> {
     const stmt = this.db.prepare(
-      'SELECT id, text, author, timestamp FROM questions ORDER BY timestamp DESC'
+      'SELECT id, text, author, lecturer, lecture, timestamp FROM questions ORDER BY timestamp DESC'
     );
     const rows = stmt.all() as Array<{
       id: string;
       text: string;
       author: string | null;
+      lecturer: string;
+      lecture: string;
       timestamp: string;
     }>;
 
@@ -49,7 +53,8 @@ export class SQLiteQuestionRepository implements QuestionRepository {
       id: row.id,
       text: row.text,
       author: row.author ?? null,
-      // Normalise to ISO string — SQLite stores TEXT, ensure it's a valid ISO 8601 string
+      lecturer: row.lecturer,
+      lecture: row.lecture,
       timestamp: new Date(row.timestamp).toISOString(),
     }));
 
@@ -57,6 +62,3 @@ export class SQLiteQuestionRepository implements QuestionRepository {
   }
 }
 
-// Singleton instance for production use (file-backed or in-memory based on env)
-const DB_PATH = process.env.SQLITE_DB_PATH ?? ':memory:';
-export const sqliteRepository = new SQLiteQuestionRepository(DB_PATH);

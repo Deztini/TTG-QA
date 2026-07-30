@@ -27,6 +27,10 @@ const mockedGetRepository = dbModule.getRepository as jest.MockedFunction<
   typeof dbModule.getRepository
 >;
 
+/** Valid lecturer/lecture pair used across tests */
+const VALID_LECTURER = 'Prof. Adejumoke';
+const VALID_LECTURE = 'Introduction to TTG';
+
 /**
  * Helper: build a NextRequest for POST /api/questions
  */
@@ -60,23 +64,19 @@ describe('GET /api/questions', () => {
   });
 
   test('returns questions ordered by timestamp descending', async () => {
-    // Insert questions with deliberate timestamps to test ordering
     const db = (repo as unknown as { db: import('better-sqlite3').Database }).db;
 
-    // Insert older question first
     db.prepare(
-      'INSERT INTO questions (id, text, author, timestamp) VALUES (?, ?, ?, ?)'
-    ).run('id-1', 'First question', 'Alice', '2024-01-01T10:00:00.000Z');
+      'INSERT INTO questions (id, text, author, lecturer, lecture, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('id-1', 'First question', 'Alice', VALID_LECTURER, VALID_LECTURE, '2024-01-01T10:00:00.000Z');
 
-    // Insert newer question second
     db.prepare(
-      'INSERT INTO questions (id, text, author, timestamp) VALUES (?, ?, ?, ?)'
-    ).run('id-2', 'Second question', 'Bob', '2024-01-01T11:00:00.000Z');
+      'INSERT INTO questions (id, text, author, lecturer, lecture, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('id-2', 'Second question', 'Bob', VALID_LECTURER, VALID_LECTURE, '2024-01-01T11:00:00.000Z');
 
-    // Insert middle question last
     db.prepare(
-      'INSERT INTO questions (id, text, author, timestamp) VALUES (?, ?, ?, ?)'
-    ).run('id-3', 'Third question', null, '2024-01-01T10:30:00.000Z');
+      'INSERT INTO questions (id, text, author, lecturer, lecture, timestamp) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run('id-3', 'Third question', null, VALID_LECTURER, VALID_LECTURE, '2024-01-01T10:30:00.000Z');
 
     const response = await GET();
 
@@ -84,12 +84,10 @@ describe('GET /api/questions', () => {
     const data = await response.json();
 
     expect(data).toHaveLength(3);
-    // Newest first
     expect(data[0].id).toBe('id-2');
     expect(data[1].id).toBe('id-3');
     expect(data[2].id).toBe('id-1');
 
-    // Verify timestamps are in descending order
     const timestamps = data.map((q: { timestamp: string }) => q.timestamp);
     for (let i = 0; i < timestamps.length - 1; i++) {
       expect(new Date(timestamps[i]).getTime()).toBeGreaterThanOrEqual(
@@ -123,7 +121,12 @@ describe('POST /api/questions', () => {
   });
 
   test('creates a question and returns 201 with the created record', async () => {
-    const request = makePostRequest({ text: 'What is a closure?', author: 'Alice' });
+    const request = makePostRequest({
+      text: 'What is a closure?',
+      author: 'Alice',
+      lecturer: VALID_LECTURER,
+      lecture: VALID_LECTURE,
+    });
     const response = await POST(request);
 
     expect(response.status).toBe(201);
@@ -132,6 +135,8 @@ describe('POST /api/questions', () => {
     expect(data).toMatchObject({
       text: 'What is a closure?',
       author: 'Alice',
+      lecturer: VALID_LECTURER,
+      lecture: VALID_LECTURE,
     });
     expect(data.id).toBeTruthy();
     expect(() => new Date(data.timestamp)).not.toThrow();
@@ -139,7 +144,7 @@ describe('POST /api/questions', () => {
   });
 
   test('returns 400 when text is missing', async () => {
-    const request = makePostRequest({ author: 'Alice' });
+    const request = makePostRequest({ author: 'Alice', lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
     const response = await POST(request);
 
     expect(response.status).toBe(400);
@@ -148,7 +153,39 @@ describe('POST /api/questions', () => {
   });
 
   test('returns 400 when text is empty', async () => {
-    const request = makePostRequest({ text: '', author: 'Alice' });
+    const request = makePostRequest({ text: '', author: 'Alice', lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toHaveProperty('error');
+  });
+
+  test('returns 400 when lecturer is missing', async () => {
+    const request = makePostRequest({ text: 'Valid question?', author: null, lecture: VALID_LECTURE });
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toHaveProperty('error');
+  });
+
+  test('returns 400 when lecture is missing', async () => {
+    const request = makePostRequest({ text: 'Valid question?', author: null, lecturer: VALID_LECTURER });
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toHaveProperty('error');
+  });
+
+  test('returns 400 when lecture does not belong to lecturer', async () => {
+    const request = makePostRequest({
+      text: 'Valid question?',
+      author: null,
+      lecturer: VALID_LECTURER,
+      lecture: 'Vision Analysis', // belongs to Pst. Obed Onos, not Prof. Adejumoke
+    });
     const response = await POST(request);
 
     expect(response.status).toBe(400);
@@ -159,7 +196,7 @@ describe('POST /api/questions', () => {
   test('returns 503 when database throws', async () => {
     jest.spyOn(repo, 'create').mockRejectedValue(new Error('DB connection failed'));
 
-    const request = makePostRequest({ text: 'Valid question text', author: null });
+    const request = makePostRequest({ text: 'Valid question text', author: null, lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
     const response = await POST(request);
 
     expect(response.status).toBe(503);
@@ -182,16 +219,16 @@ describe('POST → GET round trip', () => {
   });
 
   test('submitted question appears in subsequent GET response', async () => {
-    // POST a question
     const postRequest = makePostRequest({
       text: 'What is the event loop?',
       author: 'Charlie',
+      lecturer: VALID_LECTURER,
+      lecture: VALID_LECTURE,
     });
     const postResponse = await POST(postRequest);
     expect(postResponse.status).toBe(201);
     const createdQuestion = await postResponse.json();
 
-    // GET all questions — the created question must appear
     const getResponse = await GET();
     expect(getResponse.status).toBe(200);
     const questions = await getResponse.json();
@@ -201,6 +238,8 @@ describe('POST → GET round trip', () => {
       id: createdQuestion.id,
       text: 'What is the event loop?',
       author: 'Charlie',
+      lecturer: VALID_LECTURER,
+      lecture: VALID_LECTURE,
     });
   });
 
@@ -208,7 +247,7 @@ describe('POST → GET round trip', () => {
     const texts = ['First question', 'Second question', 'Third question'];
 
     for (const text of texts) {
-      const req = makePostRequest({ text, author: null });
+      const req = makePostRequest({ text, author: null, lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
       const res = await POST(req);
       expect(res.status).toBe(201);
     }
@@ -219,7 +258,6 @@ describe('POST → GET round trip', () => {
 
     expect(questions).toHaveLength(3);
 
-    // Verify descending timestamp order
     for (let i = 0; i < questions.length - 1; i++) {
       expect(new Date(questions[i].timestamp).getTime()).toBeGreaterThanOrEqual(
         new Date(questions[i + 1].timestamp).getTime()
