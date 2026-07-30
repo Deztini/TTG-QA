@@ -10,6 +10,7 @@
 import { NextRequest } from 'next/server';
 import { SQLiteQuestionRepository } from '@/lib/db/sqlite';
 import * as dbModule from '@/lib/db';
+import { resetRateLimitStore } from '@/lib/rateLimit';
 
 // Mock the db module so getRepository() returns our in-memory repo
 jest.mock('@/lib/db', () => {
@@ -46,6 +47,7 @@ describe('GET /api/questions', () => {
   let repo: SQLiteQuestionRepository;
 
   beforeEach(() => {
+    resetRateLimitStore();
     repo = new SQLiteQuestionRepository(':memory:');
     repo.initSchema();
     mockedGetRepository.mockReturnValue(repo);
@@ -111,6 +113,7 @@ describe('POST /api/questions', () => {
   let repo: SQLiteQuestionRepository;
 
   beforeEach(() => {
+    resetRateLimitStore();
     repo = new SQLiteQuestionRepository(':memory:');
     repo.initSchema();
     mockedGetRepository.mockReturnValue(repo);
@@ -118,6 +121,22 @@ describe('POST /api/questions', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('returns 429 after exceeding the rate limit', async () => {
+    // Submit up to the limit successfully
+    for (let i = 0; i < 5; i++) {
+      const req = makePostRequest({ text: `Question ${i}`, author: null, lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
+      const res = await POST(req);
+      expect(res.status).toBe(201);
+    }
+    // The 6th request should be rejected
+    const req = makePostRequest({ text: 'Over the limit', author: null, lecturer: VALID_LECTURER, lecture: VALID_LECTURE });
+    const res = await POST(req);
+    expect(res.status).toBe(429);
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(res.headers.get('Retry-After')).toBeTruthy();
   });
 
   test('creates a question and returns 201 with the created record', async () => {
@@ -209,6 +228,7 @@ describe('POST → GET round trip', () => {
   let repo: SQLiteQuestionRepository;
 
   beforeEach(() => {
+    resetRateLimitStore();
     repo = new SQLiteQuestionRepository(':memory:');
     repo.initSchema();
     mockedGetRepository.mockReturnValue(repo);

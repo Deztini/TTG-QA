@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRepository } from '@/lib/db';
 import { validateQuestionText, validateLecturer, validateLecture } from '@/lib/validation';
+import { checkRateLimit, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS } from '@/lib/rateLimit';
 
 const DB_ERROR_MESSAGE = 'Service temporarily unavailable. Please try again shortly.';
 const INTERNAL_ERROR_MESSAGE = 'Internal server error';
@@ -19,6 +20,30 @@ export async function GET(): Promise<NextResponse> {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // --- Rate limiting ---
+  // x-forwarded-for is set by Vercel and most reverse proxies; take the first
+  // (leftmost) address which is the original client IP.
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : (request.headers.get('x-real-ip') ?? 'unknown');
+
+  const rateLimit = checkRateLimit(ip);
+  if (!rateLimit.allowed) {
+    const retryAfterSec = Math.ceil(rateLimit.retryAfterMs / 1000);
+    return NextResponse.json(
+      {
+        error: `Too many requests. You can submit at most ${RATE_LIMIT_MAX} questions per ${RATE_LIMIT_WINDOW_MS / 60_000} minute(s). Please try again in ${retryAfterSec}s.`,
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(retryAfterSec),
+          'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
+    );
+  }
+
   // Parse JSON body
   let body: unknown;
   try {
