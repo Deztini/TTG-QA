@@ -18,7 +18,7 @@ export const LECTURERS: LecturerData[] = [
   },
   {
     name: 'Dr. Henry',
-    lectures: ['The Ministry of the Holy Spirit'],
+    lectures: ['The Ministry of the Holy Spirit', 'Cultivating Christian Work Ethics'],
   },
   {
     name: 'Pst. Obaniyi Joseph',
