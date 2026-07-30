@@ -10,6 +10,8 @@ const sampleQuestion: Question = {
   id: "1",
   text: "What is a closure?",
   author: "Alice",
+  lecturer: "Prof. Adejumoke",
+  lecture: "Introduction to TTG",
   timestamp: "2024-06-01T12:00:00.000Z",
 };
 

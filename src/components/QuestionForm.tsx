@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Question } from "@/types/question";
-import { validateQuestionText } from "@/lib/validation";
+import { validateQuestionText, validateLecturer, validateLecture } from "@/lib/validation";
+import { LECTURERS, getLecturesForLecturer } from "@/lib/lecturers";
 
 export interface QuestionFormProps {
   onSubmitted: (question: Question) => void;
@@ -13,23 +14,50 @@ type SubmissionState = "idle" | "submitting" | "success" | "error";
 export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
   const [questionText, setQuestionText] = useState("");
   const [author, setAuthor] = useState("");
+  const [lecturer, setLecturer] = useState("");
+  const [lecture, setLecture] = useState("");
   const [submissionState, setSubmissionState] = useState<SubmissionState>("idle");
   const [textError, setTextError] = useState<string | null>(null);
+  const [lecturerError, setLecturerError] = useState<string | null>(null);
+  const [lectureError, setLectureError] = useState<string | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const isSubmitting = submissionState === "submitting";
+  const availableLectures = getLecturesForLecturer(lecturer);
+
+  function handleLecturerChange(value: string) {
+    setLecturer(value);
+    setLecture(""); // reset lecture when lecturer changes
+    if (lecturerError) setLecturerError(null);
+    if (lectureError) setLectureError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     // Clear previous errors
     setTextError(null);
+    setLecturerError(null);
+    setLectureError(null);
     setSubmissionError(null);
 
-    // Client-side validation — no fetch if invalid
-    const validation = validateQuestionText(questionText);
-    if (!validation.isValid) {
-      setTextError(validation.error ?? "Invalid question text.");
+    // Client-side validation
+    const textValidation = validateQuestionText(questionText);
+    if (!textValidation.isValid) {
+      setTextError(textValidation.error ?? "Invalid question text.");
+    }
+
+    const lecturerValidation = validateLecturer(lecturer);
+    if (!lecturerValidation.isValid) {
+      setLecturerError(lecturerValidation.error ?? "Please select a lecturer.");
+    }
+
+    const lectureValidation = validateLecture(lecturer, lecture);
+    if (!lectureValidation.isValid) {
+      setLectureError(lectureValidation.error ?? "Please select a lecture.");
+    }
+
+    if (!textValidation.isValid || !lecturerValidation.isValid || !lectureValidation.isValid) {
       return;
     }
 
@@ -42,13 +70,16 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
         body: JSON.stringify({
           text: questionText,
           author: author.trim() || null,
+          lecturer,
+          lecture,
         }),
       });
 
       if (response.status === 201) {
         const newQuestion: Question = await response.json();
-        // Clear only the question text; author stays
         setQuestionText("");
+        setLecturer("");
+        setLecture("");
         onSubmitted(newQuestion);
         setSubmissionState("idle");
       } else {
@@ -76,6 +107,69 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      {/* Lecturer dropdown */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="lecturer" className="text-sm font-medium text-gray-700">
+          Lecturer <span aria-hidden="true" className="text-red-500">*</span>
+        </label>
+        <select
+          id="lecturer"
+          name="lecturer"
+          value={lecturer}
+          onChange={(e) => handleLecturerChange(e.target.value)}
+          disabled={isSubmitting}
+          aria-describedby={lecturerError ? "lecturer-error" : undefined}
+          aria-invalid={lecturerError ? "true" : undefined}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="">— Select a lecturer —</option>
+          {LECTURERS.map((l) => (
+            <option key={l.name} value={l.name}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+        {lecturerError && (
+          <p id="lecturer-error" role="alert" className="text-sm text-red-600">
+            {lecturerError}
+          </p>
+        )}
+      </div>
+
+      {/* Lecture dropdown — cascades from lecturer */}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="lecture" className="text-sm font-medium text-gray-700">
+          Lecture / Topic <span aria-hidden="true" className="text-red-500">*</span>
+        </label>
+        <select
+          id="lecture"
+          name="lecture"
+          value={lecture}
+          onChange={(e) => {
+            setLecture(e.target.value);
+            if (lectureError) setLectureError(null);
+          }}
+          disabled={isSubmitting || !lecturer}
+          aria-describedby={lectureError ? "lecture-error" : undefined}
+          aria-invalid={lectureError ? "true" : undefined}
+          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="">
+            {lecturer ? "— Select a lecture —" : "— Select a lecturer first —"}
+          </option>
+          {availableLectures.map((lec) => (
+            <option key={lec} value={lec}>
+              {lec}
+            </option>
+          ))}
+        </select>
+        {lectureError && (
+          <p id="lecture-error" role="alert" className="text-sm text-red-600">
+            {lectureError}
+          </p>
+        )}
+      </div>
+
       {/* Question text field */}
       <div className="flex flex-col gap-1">
         <label htmlFor="questionText" className="text-sm font-medium text-gray-700">
@@ -87,7 +181,6 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
           value={questionText}
           onChange={(e) => {
             setQuestionText(e.target.value);
-            // Clear text error as user types
             if (textError) setTextError(null);
           }}
           maxLength={500}
@@ -152,7 +245,6 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
       >
         {isSubmitting ? (
           <>
-            {/* Loading spinner */}
             <svg
               className="h-4 w-4 animate-spin"
               xmlns="http://www.w3.org/2000/svg"

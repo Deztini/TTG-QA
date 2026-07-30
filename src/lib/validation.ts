@@ -1,7 +1,8 @@
+import { isValidLecturer, isValidLecture } from './lecturers';
+
 /**
- * Validates the question text field against the rules defined in Requirements 1.4, 1.5, and 4.4:
- * - Must be a string
- * - Must not be empty or whitespace-only (min 1 non-whitespace character)
+ * Validates the question text field:
+ * - Must be a non-empty string
  * - Must not exceed 500 characters
  */
 export function validateQuestionText(
@@ -22,5 +23,36 @@ export function validateQuestionText(
     };
   }
 
+  return { isValid: true };
+}
+
+/**
+ * Validates that the lecturer is one of the known lecturers.
+ */
+export function validateLecturer(
+  lecturer: unknown
+): { isValid: boolean; error?: string } {
+  if (typeof lecturer !== "string" || lecturer.trim().length === 0) {
+    return { isValid: false, error: "Please select a lecturer" };
+  }
+  if (!isValidLecturer(lecturer)) {
+    return { isValid: false, error: "Invalid lecturer selected" };
+  }
+  return { isValid: true };
+}
+
+/**
+ * Validates that the lecture belongs to the given lecturer.
+ */
+export function validateLecture(
+  lecturerName: unknown,
+  lecture: unknown
+): { isValid: boolean; error?: string } {
+  if (typeof lecture !== "string" || lecture.trim().length === 0) {
+    return { isValid: false, error: "Please select a lecture" };
+  }
+  if (typeof lecturerName !== "string" || !isValidLecture(lecturerName, lecture)) {
+    return { isValid: false, error: "Invalid lecture for the selected lecturer" };
+  }
   return { isValid: true };
 }
