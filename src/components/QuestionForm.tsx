@@ -84,7 +84,14 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
         setSubmissionState("idle");
       } else {
         let errorMessage = "Submission failed. Please try again.";
-        if (response.status === 503) {
+        if (response.status === 429) {
+          try {
+            const body = await response.json();
+            errorMessage = body?.error ?? "Too many submissions. Please wait a moment before trying again.";
+          } catch {
+            errorMessage = "Too many submissions. Please wait a moment before trying again.";
+          }
+        } else if (response.status === 503) {
           errorMessage = "Submission failed — the server is temporarily unavailable.";
         } else {
           try {

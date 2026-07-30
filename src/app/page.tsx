@@ -6,6 +6,7 @@ import { usePoller } from "@/hooks/usePoller";
 import { mergeQuestions } from "@/lib/mergeQuestions";
 import QuestionForm from "@/components/QuestionForm";
 import QuestionList from "@/components/QuestionList";
+import FilterBar from "@/components/FilterBar";
 
 export default function Page() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -14,6 +15,10 @@ export default function Page() {
   const [hasPriorData, setHasPriorData] = useState(false);
   const [pollerStopped, setPollerStopped] = useState(false);
   const [connectivityBanner, setConnectivityBanner] = useState<string | null>(null);
+
+  // Filter state
+  const [filterLecturer, setFilterLecturer] = useState("");
+  const [filterLecture, setFilterLecture] = useState("");
 
   const handleQuestions = useCallback((incoming: Question[]) => {
     setHasPriorData(true);
@@ -55,9 +60,26 @@ export default function Page() {
     restart();
   }, [restart]);
 
+  const handleLecturerFilterChange = useCallback((lecturer: string) => {
+    setFilterLecturer(lecturer);
+    setFilterLecture(""); // reset lecture when lecturer changes
+  }, []);
+
+  const handleClearFilter = useCallback(() => {
+    setFilterLecturer("");
+    setFilterLecture("");
+  }, []);
+
+  // Compute filtered questions — purely derived, no extra state
+  const filteredQuestions = questions.filter((q) => {
+    if (filterLecturer && q.lecturer !== filterLecturer) return false;
+    if (filterLecture && q.lecture !== filterLecture) return false;
+    return true;
+  });
+
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Connectivity banner — shown when there are active fetch errors but polling hasn't stopped */}
+      {/* Connectivity banner */}
       {connectivityBanner && !pollerStopped && (
         <div
           role="alert"
@@ -68,7 +90,7 @@ export default function Page() {
         </div>
       )}
 
-      {/* Connection lost banner — shown when poller has stopped after max failures */}
+      {/* Connection lost banner */}
       {pollerStopped && (
         <div
           role="alert"
@@ -93,8 +115,23 @@ export default function Page() {
         </section>
 
         <section>
+          {/* Filter bar — only render once we have data */}
+          {hasPriorData && (
+            <div className="mb-4">
+              <FilterBar
+                selectedLecturer={filterLecturer}
+                selectedLecture={filterLecture}
+                totalCount={questions.length}
+                filteredCount={filteredQuestions.length}
+                onLecturerChange={handleLecturerFilterChange}
+                onLectureChange={setFilterLecture}
+                onClear={handleClearFilter}
+              />
+            </div>
+          )}
+
           <QuestionList
-            questions={questions}
+            questions={filteredQuestions}
             loading={loadingInitial}
             error={fetchError}
             hasPriorData={hasPriorData}
