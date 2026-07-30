@@ -1,0 +1,394 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Scaffold the Next.js project and configure tooling": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324698223
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785325245647
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341237862
+      }
+    ],
+    "2.1 Create `src/types/question.ts` exporting the `Question` interface and `CreateQuestionDTO` interface": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324702564
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324722651
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785325223938
+      }
+    ],
+    "2.2 Create `src/lib/validation.ts` exporting `validateQuestionText(text: unknown): { isValid: boolean; error?: string }`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324703219
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324726240
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785325227673
+      }
+    ],
+    "3.1 Create `src/lib/db/repository.ts` exporting the `QuestionRepository` interface": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324704203
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785325249790
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341242327
+      }
+    ],
+    "3.2 Create `src/lib/db/sqlite.ts` implementing `SQLiteQuestionRepository`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324704643
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341258751
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341447638
+      }
+    ],
+    "3.4 Create `src/lib/db/postgres.ts` implementing `PostgresQuestionRepository`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324704882
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341264457
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341451873
+      }
+    ],
+    "3.5 Create `src/lib/db/index.ts` exporting `getRepository(): QuestionRepository`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324705521
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341456103
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341527956
+      }
+    ],
+    "4. Checkpoint — run tests and verify the data layer": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324705753
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341532442
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341675195
+      }
+    ],
+    "5.1 Create `src/app/api/questions/route.ts` with `GET` and `POST` handlers": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324705956
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341680339
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341890271
+      }
+    ],
+    "6.1 Create `src/components/QuestionCard.tsx`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324706167
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341684310
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341897702
+      }
+    ],
+    "6.3 Create `src/components/QuestionList.tsx`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324706407
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341915549
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342060839
+      }
+    ],
+    "6.5 Create `src/components/QuestionForm.tsx`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324706631
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341920268
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342064980
+      }
+    ],
+    "7. Checkpoint — run tests and verify all UI components": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707013
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342071834
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342192029
+      }
+    ],
+    "8.1 Create `src/hooks/usePoller.ts`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707214
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341688235
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341904741
+      }
+    ],
+    "9.1 Create `src/app/page.tsx` as a Client Component (`\"use client\"`)": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707421
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342076351
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342197608
+      }
+    ],
+    "9.2 Implement the deduplication merge utility in `src/lib/mergeQuestions.ts`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707594
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341692154
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341909656
+      }
+    ],
+    "10.1 Write `jest-axe` accessibility tests for `QuestionForm` and `QuestionList`": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707787
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342203342
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342433378
+      }
+    ],
+    "10.2 Write integration tests using SQLite `:memory:` wired to the route handlers": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324707961
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342213739
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342437797
+      }
+    ],
+    "10.3 Create Lighthouse CI configuration file `lighthouserc.json` at project root": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324708129
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342217953
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342442240
+      }
+    ],
+    "11. Final checkpoint — full test suite and build verification": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785324708301
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342449074
+      },
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342709226
+      }
+    ],
+    "2. Define the shared `Question` type and validation utilities": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785325227910
+      }
+    ],
+    "3. Implement the database schema and `QuestionRepository` interface": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341528109
+      }
+    ],
+    "5. Implement the API route handlers": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341893398
+      }
+    ],
+    "8. Implement `usePoller` hook": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785341905161
+      }
+    ],
+    "6. Implement UI components": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342065173
+      }
+    ],
+    "9. Implement the Page component and wire everything together": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342197965
+      }
+    ],
+    "10. Add accessibility and integration tests": [
+      {
+        "executionId": "9ea806d1-decf-43a5-bc85-b3f40b38fea4",
+        "chatSessionId": "sess_46827368-701f-4b37-a854-d58cd3d8e538",
+        "timestamp": 1785342442462
+      }
+    ]
+  }
+}
