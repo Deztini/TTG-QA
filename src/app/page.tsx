@@ -6,7 +6,6 @@ import { usePoller } from "@/hooks/usePoller";
 import { mergeQuestions } from "@/lib/mergeQuestions";
 import QuestionForm from "@/components/QuestionForm";
 import QuestionList from "@/components/QuestionList";
-import FilterBar from "@/components/FilterBar";
 
 export default function Page() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -15,10 +14,6 @@ export default function Page() {
   const [hasPriorData, setHasPriorData] = useState(false);
   const [pollerStopped, setPollerStopped] = useState(false);
   const [connectivityBanner, setConnectivityBanner] = useState<string | null>(null);
-
-  // Filter state
-  const [filterLecturer, setFilterLecturer] = useState("");
-  const [filterLecture, setFilterLecture] = useState("");
 
   const handleQuestions = useCallback((incoming: Question[]) => {
     setHasPriorData(true);
@@ -60,84 +55,58 @@ export default function Page() {
     restart();
   }, [restart]);
 
-  const handleLecturerFilterChange = useCallback((lecturer: string) => {
-    setFilterLecturer(lecturer);
-    setFilterLecture(""); // reset lecture when lecturer changes
-  }, []);
-
-  const handleClearFilter = useCallback(() => {
-    setFilterLecturer("");
-    setFilterLecture("");
-  }, []);
-
-  // Compute filtered questions — purely derived, no extra state
-  const filteredQuestions = questions.filter((q) => {
-    if (filterLecturer && q.lecturer !== filterLecturer) return false;
-    if (filterLecture && q.lecture !== filterLecture) return false;
-    return true;
-  });
-
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Connectivity banner */}
+    <div className="min-h-screen bg-zinc-50">
+      {/* ── Connectivity banner ── */}
       {connectivityBanner && !pollerStopped && (
         <div
           role="alert"
           aria-live="polite"
-          className="sticky top-0 z-10 w-full bg-amber-100 border-b border-amber-300 px-4 py-2 text-center text-sm text-amber-800"
+          className="w-full bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-center text-sm text-amber-700 font-medium"
         >
           {connectivityBanner}
         </div>
       )}
 
-      {/* Connection lost banner */}
+      {/* ── Connection lost banner ── */}
       {pollerStopped && (
         <div
           role="alert"
           aria-live="assertive"
-          className="sticky top-0 z-10 w-full bg-red-100 border-b border-red-300 px-4 py-2 text-center text-sm text-red-800 flex items-center justify-center gap-3"
+          className="w-full bg-red-50 border-b border-red-200 px-4 py-2.5 text-center text-sm text-red-700 flex items-center justify-center gap-3"
         >
-          <span>Connection lost.</span>
+          <span className="font-medium">Connection lost.</span>
           <button
             onClick={handleRetry}
-            className="underline font-semibold hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded"
+            className="underline font-semibold hover:text-red-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
           >
             Retry
           </button>
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">TTG QA</h1>
+      <header className="bg-white border-b border-zinc-200">
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div>
+            <h1 className="text-xl font-bold text-zinc-900 leading-tight">TTG QA</h1>
+            <p className="text-xs text-zinc-400 mt-0.5">Real-time question &amp; answer</p>
+          </div>
+        </div>
+      </header>
 
-        <section className="mb-8">
-          <QuestionForm onSubmitted={handleSubmitted} />
-        </section>
+      {/* ── Main content ── */}
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6" id="main-content">
+        {/* Question form */}
+        <QuestionForm onSubmitted={handleSubmitted} />
 
-        <section>
-          {/* Filter bar — only render once we have data */}
-          {hasPriorData && (
-            <div className="mb-4">
-              <FilterBar
-                selectedLecturer={filterLecturer}
-                selectedLecture={filterLecture}
-                totalCount={questions.length}
-                filteredCount={filteredQuestions.length}
-                onLecturerChange={handleLecturerFilterChange}
-                onLectureChange={setFilterLecture}
-                onClear={handleClearFilter}
-              />
-            </div>
-          )}
-
-          <QuestionList
-            questions={filteredQuestions}
-            loading={loadingInitial}
-            error={fetchError}
-            hasPriorData={hasPriorData}
-          />
-        </section>
-      </div>
-    </main>
+        {/* Question list */}
+        <QuestionList
+          questions={questions}
+          loading={loadingInitial}
+          error={fetchError}
+          hasPriorData={hasPriorData}
+        />
+      </main>
+    </div>
   );
 }

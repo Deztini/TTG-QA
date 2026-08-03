@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Question } from "@/types/question";
 import { validateQuestionText, validateLecturer, validateLecture } from "@/lib/validation";
 import { LECTURERS, getLecturesForLecturer } from "@/lib/lecturers";
+import AnimatedSelect from "@/components/AnimatedSelect";
 
 export interface QuestionFormProps {
   onSubmitted: (question: Question) => void;
@@ -27,39 +28,28 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
 
   function handleLecturerChange(value: string) {
     setLecturer(value);
-    setLecture(""); // reset lecture when lecturer changes
+    setLecture("");
     if (lecturerError) setLecturerError(null);
     if (lectureError) setLectureError(null);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    // Clear previous errors
     setTextError(null);
     setLecturerError(null);
     setLectureError(null);
     setSubmissionError(null);
 
-    // Client-side validation
     const textValidation = validateQuestionText(questionText);
-    if (!textValidation.isValid) {
-      setTextError(textValidation.error ?? "Invalid question text.");
-    }
+    if (!textValidation.isValid) setTextError(textValidation.error ?? "Invalid question.");
 
     const lecturerValidation = validateLecturer(lecturer);
-    if (!lecturerValidation.isValid) {
-      setLecturerError(lecturerValidation.error ?? "Please select a lecturer.");
-    }
+    if (!lecturerValidation.isValid) setLecturerError(lecturerValidation.error ?? "Select a lecturer.");
 
     const lectureValidation = validateLecture(lecturer, lecture);
-    if (!lectureValidation.isValid) {
-      setLectureError(lectureValidation.error ?? "Please select a lecture.");
-    }
+    if (!lectureValidation.isValid) setLectureError(lectureValidation.error ?? "Select a lecture.");
 
-    if (!textValidation.isValid || !lecturerValidation.isValid || !lectureValidation.isValid) {
-      return;
-    }
+    if (!textValidation.isValid || !lecturerValidation.isValid || !lectureValidation.isValid) return;
 
     setSubmissionState("submitting");
 
@@ -87,198 +77,153 @@ export default function QuestionForm({ onSubmitted }: QuestionFormProps) {
         if (response.status === 429) {
           try {
             const body = await response.json();
-            errorMessage = body?.error ?? "Too many submissions. Please wait a moment before trying again.";
-          } catch {
-            errorMessage = "Too many submissions. Please wait a moment before trying again.";
-          }
+            errorMessage = body?.error ?? "Too many submissions. Please wait before trying again.";
+          } catch { errorMessage = "Too many submissions. Please wait before trying again."; }
         } else if (response.status === 503) {
-          errorMessage = "Submission failed — the server is temporarily unavailable.";
+          errorMessage = "Service temporarily unavailable.";
         } else {
           try {
             const body = await response.json();
-            if (body?.error) {
-              errorMessage = body.error;
-            }
-          } catch {
-            // Use fallback message
-          }
+            if (body?.error) errorMessage = body.error;
+          } catch { /* use fallback */ }
         }
         setSubmissionError(errorMessage);
         setSubmissionState("error");
       }
     } catch {
-      setSubmissionError("Submission failed. Please check your connection and try again.");
+      setSubmissionError("Submission failed. Check your connection and try again.");
       setSubmissionState("error");
     }
   }
 
+  const inputBase =
+    "w-full rounded-lg border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 shadow-sm transition-shadow focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 disabled:bg-zinc-50 disabled:cursor-not-allowed";
+
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-4">
-      {/* Lecturer dropdown */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="lecturer" className="text-sm font-medium text-gray-700">
-          Lecturer <span aria-hidden="true" className="text-red-500">*</span>
-        </label>
-        <select
-          id="lecturer"
-          name="lecturer"
-          value={lecturer}
-          onChange={(e) => handleLecturerChange(e.target.value)}
-          disabled={isSubmitting}
-          aria-describedby={lecturerError ? "lecturer-error" : undefined}
-          aria-invalid={lecturerError ? "true" : undefined}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-        >
-          <option value="">— Select a lecturer —</option>
-          {LECTURERS.map((l) => (
-            <option key={l.name} value={l.name}>
-              {l.name}
-            </option>
-          ))}
-        </select>
-        {lecturerError && (
-          <p id="lecturer-error" role="alert" className="text-sm text-red-600">
-            {lecturerError}
-          </p>
-        )}
+    <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 sm:p-6">
+      {/* Form header */}
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold text-zinc-900">Ask a question</h2>
+        <p className="text-sm text-zinc-400 mt-0.5">Select the lecturer and topic, then type your question.</p>
       </div>
 
-      {/* Lecture dropdown — cascades from lecturer */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="lecture" className="text-sm font-medium text-gray-700">
-          Lecture / Topic <span aria-hidden="true" className="text-red-500">*</span>
-        </label>
-        <select
-          id="lecture"
-          name="lecture"
-          value={lecture}
-          onChange={(e) => {
-            setLecture(e.target.value);
-            if (lectureError) setLectureError(null);
-          }}
-          disabled={isSubmitting || !lecturer}
-          aria-describedby={lectureError ? "lecture-error" : undefined}
-          aria-invalid={lectureError ? "true" : undefined}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-        >
-          <option value="">
-            {lecturer ? "— Select a lecture —" : "— Select a lecturer first —"}
-          </option>
-          {availableLectures.map((lec) => (
-            <option key={lec} value={lec}>
-              {lec}
-            </option>
-          ))}
-        </select>
-        {lectureError && (
-          <p id="lecture-error" role="alert" className="text-sm text-red-600">
-            {lectureError}
-          </p>
-        )}
-      </div>
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {/* Cascading dropdowns row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Lecturer */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="lecturer" className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+              Lecturer <span className="text-red-400" aria-hidden="true">*</span>
+            </label>
+            <AnimatedSelect
+              id="lecturer"
+              aria-label="Lecturer"
+              value={lecturer}
+              onChange={handleLecturerChange}
+              options={LECTURERS.map((l) => ({ value: l.name, label: l.name }))}
+              placeholder="Select lecturer"
+              disabled={isSubmitting}
+              aria-describedby={lecturerError ? "lecturer-error" : undefined}
+              aria-invalid={lecturerError ? "true" : undefined}
+            />
+            {lecturerError && (
+              <p id="lecturer-error" role="alert" className="text-xs text-red-500">{lecturerError}</p>
+            )}
+          </div>
 
-      {/* Question text field */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="questionText" className="text-sm font-medium text-gray-700">
-          Your question <span aria-hidden="true" className="text-red-500">*</span>
-        </label>
-        <textarea
-          id="questionText"
-          name="questionText"
-          value={questionText}
-          onChange={(e) => {
-            setQuestionText(e.target.value);
-            if (textError) setTextError(null);
-          }}
-          maxLength={500}
-          rows={4}
-          disabled={isSubmitting}
-          aria-describedby={textError ? "questionText-error" : "questionText-hint"}
-          aria-invalid={textError ? "true" : undefined}
-          placeholder="Type your question here…"
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
-        />
-        <div className="flex items-start justify-between gap-2">
-          <span
-            id="questionText-hint"
-            className="text-xs text-gray-500"
-            aria-live="polite"
-          >
-            {questionText.length}/500 characters
-          </span>
+          {/* Lecture */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="lecture" className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+              Topic <span className="text-red-400" aria-hidden="true">*</span>
+            </label>
+            <AnimatedSelect
+              id="lecture"
+              aria-label="Lecture topic"
+              value={lecture}
+              onChange={(v) => { setLecture(v); if (lectureError) setLectureError(null); }}
+              options={availableLectures.map((lec) => ({ value: lec, label: lec }))}
+              placeholder={lecturer ? "Select topic" : "Select lecturer first"}
+              disabled={isSubmitting || !lecturer}
+              aria-describedby={lectureError ? "lecture-error" : undefined}
+              aria-invalid={lectureError ? "true" : undefined}
+            />
+            {lectureError && (
+              <p id="lecture-error" role="alert" className="text-xs text-red-500">{lectureError}</p>
+            )}
+          </div>
         </div>
-        {textError && (
-          <p
-            id="questionText-error"
-            role="alert"
-            className="text-sm text-red-600"
-          >
-            {textError}
-          </p>
-        )}
-      </div>
 
-      {/* Author field */}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="author" className="text-sm font-medium text-gray-700">
-          Your name <span className="text-gray-400 font-normal">(optional)</span>
-        </label>
-        <input
-          type="text"
-          id="author"
-          name="author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          maxLength={100}
+        {/* Question textarea */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="questionText" className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+            Your question <span className="text-red-400" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="questionText"
+            value={questionText}
+            onChange={(e) => { setQuestionText(e.target.value); if (textError) setTextError(null); }}
+            maxLength={500}
+            rows={4}
+            disabled={isSubmitting}
+            placeholder="What would you like to ask?"
+            aria-describedby={textError ? "questionText-error" : "char-count"}
+            aria-invalid={textError ? "true" : undefined}
+            className={`${inputBase} resize-none`}
+          />
+          <div className="flex items-center justify-between">
+            <span id="char-count" className="text-xs text-zinc-400" aria-live="polite">
+              {questionText.length}/500
+            </span>
+            {textError && (
+              <p id="questionText-error" role="alert" className="text-xs text-red-500">{textError}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Author input */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="author" className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+            Your name <span className="text-zinc-300 font-normal normal-case">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            maxLength={100}
+            disabled={isSubmitting}
+            placeholder="Anonymous"
+            className={inputBase}
+          />
+        </div>
+
+        {/* Submission error */}
+        {submissionState === "error" && submissionError && (
+          <div role="alert" className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {submissionError}
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
           disabled={isSubmitting}
-          placeholder="Anonymous"
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-        />
-      </div>
-
-      {/* Submission error */}
-      {submissionState === "error" && submissionError && (
-        <p role="alert" className="text-sm text-red-600">
-          {submissionError}
-        </p>
-      )}
-
-      {/* Submit button */}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        aria-busy={isSubmitting ? "true" : undefined}
-        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-      >
-        {isSubmitting ? (
-          <>
-            <svg
-              className="h-4 w-4 animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            Submitting…
-          </>
-        ) : (
-          "Submit Question"
-        )}
-      </button>
-    </form>
+          aria-busy={isSubmitting ? "true" : undefined}
+          className="w-full flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? (
+            <>
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Submitting…
+            </>
+          ) : (
+            "Submit question"
+          )}
+        </button>
+      </form>
+    </div>
   );
 }

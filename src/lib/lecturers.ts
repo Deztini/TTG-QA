@@ -37,8 +37,8 @@ export const LECTURERS: LecturerData[] = [
     lectures: ['Success Concepts'],
   },
   {
-    name: 'Prof. Dada Oluwasogo',
-    lectures: ['Hard Work Works'],
+    name: 'Prof. Oluwasogo Dada',
+    lectures: ['Hard Work Works', 'Principles of Answered prayers'],
   },
   {
     name: 'Prof. Abiodun',
@@ -47,6 +47,18 @@ export const LECTURERS: LecturerData[] = [
   {
     name: 'Dr. Awe',
     lectures: ['Preparing for NYSC'],
+  },
+  {
+    name: 'Dr. Gbenga Owoeye',
+    lectures: ['Principles of Divine Health'],
+  },
+  {
+    name: 'Dr. Oluwasegun omidiora',
+    lectures: ['covenant business startups'],
+  },
+  {
+    name: 'Pst. Charles Akporhonor',
+    lectures: ['Dynamics of Kingdom stewardship'],
   },
 ];
 
