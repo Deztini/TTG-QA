@@ -1,5 +1,5 @@
 import { Question } from "@/types/question";
-import QuestionCard from "@/components/QuestionCard";
+import QuestionGroup from "@/components/QuestionGroup";
 
 interface QuestionListProps {
   questions: Question[];
@@ -7,6 +7,38 @@ interface QuestionListProps {
   error: string | null;
   hasPriorData: boolean;
 }
+
+// ── Grouping helpers ────────────────────────────────────────────────────────
+
+interface LectureGroup {
+  lecture: string;
+  lecturer: string;
+  questions: Question[]; // newest-first (inherited from API sort)
+}
+
+/**
+ * Groups a flat, newest-first question array by lecture topic.
+ * Groups are sorted by the timestamp of their most recent question so the
+ * most active topic always appears first.
+ */
+function groupByLecture(questions: Question[]): LectureGroup[] {
+  const map = new Map<string, LectureGroup>();
+
+  for (const q of questions) {
+    if (!map.has(q.lecture)) {
+      map.set(q.lecture, { lecture: q.lecture, lecturer: q.lecturer, questions: [] });
+    }
+    map.get(q.lecture)!.questions.push(q);
+  }
+
+  return Array.from(map.values()).sort((a, b) => {
+    const aTime = new Date(a.questions[0]?.timestamp ?? 0).getTime();
+    const bTime = new Date(b.questions[0]?.timestamp ?? 0).getTime();
+    return bTime - aTime;
+  });
+}
+
+// ── Sub-components ──────────────────────────────────────────────────────────
 
 function LoadingSkeleton() {
   return (
@@ -29,18 +61,20 @@ function LoadingSkeleton() {
   );
 }
 
+// ── Main component ──────────────────────────────────────────────────────────
+
 export default function QuestionList({
   questions,
   loading,
   error,
   hasPriorData,
 }: QuestionListProps) {
-  // State 1: Initial load — show skeleton, no prior data
+  // State 1: Initial load — skeleton, no prior data yet
   if (loading && !hasPriorData) {
     return <LoadingSkeleton />;
   }
 
-  // State 2: Error with no prior data — full-page error
+  // State 2: Hard error with no prior data — full-page error
   if (error && !hasPriorData) {
     return (
       <div
@@ -69,9 +103,11 @@ export default function QuestionList({
     );
   }
 
+  const groups = groupByLecture(questions);
+
   return (
-    <div className="w-full space-y-4">
-      {/* State 3: Error with prior data — non-blocking banner at top */}
+    <div className="w-full space-y-3">
+      {/* State 3: Non-blocking error banner with prior data */}
       {error && hasPriorData && (
         <div
           role="alert"
@@ -104,12 +140,17 @@ export default function QuestionList({
         </div>
       )}
 
-      {/* State 5: Question list */}
-      {questions.length > 0 && (
-        <ul className="space-y-4 list-none p-0 m-0">
-          {questions.map((question) => (
-            <li key={question.id}>
-              <QuestionCard question={question} />
+      {/* State 5: Grouped question list */}
+      {groups.length > 0 && (
+        <ul className="space-y-3 list-none p-0 m-0">
+          {groups.map((group, index) => (
+            <li key={group.lecture}>
+              <QuestionGroup
+                lecture={group.lecture}
+                lecturer={group.lecturer}
+                questions={group.questions}
+                defaultExpanded={index === 0} // auto-expand the most active topic
+              />
             </li>
           ))}
         </ul>
