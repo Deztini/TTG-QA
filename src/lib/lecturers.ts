@@ -52,13 +52,17 @@ export const LECTURERS: LecturerData[] = [
     name: 'Dr. Gbenga Owoeye',
     lectures: ['Principles of Divine Health'],
   },
+    {
+    name: 'Dr. Olumoyewa Atoyebi',
+    lectures: ['The Trap of Pride'],
+  },
   {
     name: 'Dr. Oluwasegun omidiora',
-    lectures: ['covenant business startups'],
+    lectures: ['Covenant Business Startups', 'Dynamics of Spirituality'],
   },
   {
     name: 'Pst. Charles Akporhonor',
-    lectures: ['Dynamics of Kingdom stewardship'],
+    lectures: ['Dynamics of Kingdom stewardship', 'The Supernatural'],
   },
 ];
 
