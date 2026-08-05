@@ -34,7 +34,7 @@ export const LECTURERS: LecturerData[] = [
   },
   {
     name: 'Prof. Ajanaku',
-    lectures: ['Success Concepts'],
+    lectures: ['Success Concepts', 'Principles of Work-Life Balance'],
   },
   {
     name: 'Prof. Oluwasogo Dada',
